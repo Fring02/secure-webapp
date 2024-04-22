@@ -24,12 +24,12 @@ public class PasswordHasher {
         random.nextBytes(salt);
         return salt;
     }
-    public String generateHash(String data, byte[] salt) throws NoSuchAlgorithmException, InvalidKeySpecException {
+    public byte[] generateHash(String data, byte[] salt) throws NoSuchAlgorithmException, InvalidKeySpecException {
         PBEKeySpec spec = new PBEKeySpec(data.toCharArray(), salt, iterations, keySize);
         SecretKeyFactory skf = SecretKeyFactory.getInstance(algorithm);
 
         byte[] hash = skf.generateSecret(spec).getEncoded();
-        return toHex(hash);
+        return hash;
     }
     public boolean verify(String password, byte[] hash, byte[] salt) throws NoSuchAlgorithmException, InvalidKeySpecException
     {
@@ -42,7 +42,7 @@ public class PasswordHasher {
             diff |= hash[i] ^ hashToVerify[i];
         return diff == 0;
     }
-    private String toHex(byte[] arr){
+    public String toHex(byte[] arr){
         return Hex.encodeHexString(arr);
     }
 }
