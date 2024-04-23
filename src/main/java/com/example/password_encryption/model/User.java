@@ -7,8 +7,6 @@ import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.time.LocalDate;
-
 @Entity
 @Table(name = "users")
 @Getter
@@ -23,8 +21,4 @@ public class User {
     private byte[] hash;
     @Column(name = "salt", nullable = false, unique = true)
     private byte[] salt;
-    @Column(name = "refreshToken")
-    private String refreshToken;
-    @Column(name = "refreshTokenExpiryDate")
-    private LocalDate refreshTokenExpiryDate = LocalDate.now();
 }
