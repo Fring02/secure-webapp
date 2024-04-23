@@ -1,4 +1,4 @@
-package com.example.password_encryption.crypto.hashing;
+package com.example.password_encryption.security.hashing;
 
 import org.apache.commons.codec.binary.Hex;
 import org.springframework.beans.factory.annotation.Value;
