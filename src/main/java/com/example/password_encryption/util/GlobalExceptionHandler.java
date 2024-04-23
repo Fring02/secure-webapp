@@ -1,5 +1,7 @@
 package com.example.password_encryption.util;
 
+import jakarta.persistence.EntityExistsException;
+import jakarta.persistence.EntityNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
@@ -17,7 +19,8 @@ import java.security.spec.InvalidKeySpecException;
 @RestControllerAdvice
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     private final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
-    @ExceptionHandler({InvalidCredentialsException.class})
+    @ExceptionHandler({InvalidCredentialsException.class, IllegalArgumentException.class, EntityNotFoundException.class,
+    EntityExistsException.class})
     public ResponseEntity<String> handleBadRequest(Exception e){
         logger.warn("Bad request: " + e.getMessage());
         if(e.getMessage() == null) return ResponseEntity.badRequest().build();
