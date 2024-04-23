@@ -12,47 +12,35 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 
 @RestController
 @RequestMapping("/api/users")
-public class UsersController {
+public class UsersController extends BaseController {
     private final UserService service;
-    private final JwtUtilService jwtService;
-    private final Logger logger = LoggerFactory.getLogger(UsersController.class);
     public UsersController(UserService service, JwtUtilService jwtService) {
+        super(LoggerFactory.getLogger(UsersController.class), jwtService);
         this.service = service;
-        this.jwtService = jwtService;
     }
     @GetMapping("/hello")
     public String getHello(){
         return "hello";
     }
     @PostMapping("/register")
-    public ResponseEntity<TokensBody> registerUser(@RequestBody UserDto dto) throws InvalidCredentialsException, NoSuchAlgorithmException, InvalidKeySpecException {
+    public ResponseEntity<TokensBody> registerUser(@RequestBody UserDto dto) throws InvalidCredentialsException, NoSuchAlgorithmException, InvalidKeySpecException, IOException {
         var tokens = service.register(dto);
         return ResponseEntity.ok(tokens);
     }
     @PostMapping("/login")
-    public ResponseEntity<TokensBody> loginUser(@RequestBody UserDto dto) throws InvalidCredentialsException, NoSuchAlgorithmException, InvalidKeySpecException {
+    public ResponseEntity<TokensBody> loginUser(@RequestBody UserDto dto) throws InvalidCredentialsException, NoSuchAlgorithmException, InvalidKeySpecException, IOException {
         var tokens = service.login(dto);
         return ResponseEntity.ok(tokens);
     }
     @GetMapping
     public ResponseEntity<?> getAllUsers(@RequestHeader("Authorization") String token){
-        token = token.substring(7);
-        if(StringUtils.isBlank(token)) return ResponseEntity.status(401).body("Unauthorized");
-        try {
-            if(!jwtService.isValid(token)) {
-                logger.warn("Couldn't fetch user from token, unauthorized");
-                return ResponseEntity.status(401).body("Unauthorized");
-            }
-            return ResponseEntity.ok(service.getAllUsers());
-        }
-        catch (IllegalArgumentException | JwtException e){
-            logger.warn("Unauthorized: " + e.getMessage());
-            return ResponseEntity.status(401).body("Unauthorized");
-        }
+        validateAndFetchToken(token);
+        return ResponseEntity.ok(service.getAllUsers());
     }
 }

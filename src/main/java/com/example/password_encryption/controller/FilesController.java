@@ -1,42 +1,62 @@
-package com.example.password_encryption.crypto.encrypt;
+package com.example.password_encryption.controller;
 
+import com.example.password_encryption.model.File;
+import com.example.password_encryption.service.FilesService;
+import com.example.password_encryption.util.EncryptionException;
+import com.example.password_encryption.util.JwtUtilService;
+import jakarta.servlet.http.HttpServletResponse;
+import org.apache.commons.codec.DecoderException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
-import java.io.*;
-import java.security.*;
-import javax.crypto.*;
-import java.util.Base64;
 
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
-import javax.crypto.*;
-import javax.crypto.spec.SecretKeySpec;
+
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.security.*;
+import java.io.InputStream;
+import java.security.spec.InvalidKeySpecException;
 
 @RestController
-public class TextEncrypt {
-
-    private PublicKey publicKey;
-    private PrivateKey privateKey;
-
-    public TextEncrypt() {
-        try {
-            // Generate Key Pair
-            KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA");
-            keyPairGenerator.initialize(2048);
-            KeyPair keyPair = keyPairGenerator.generateKeyPair();
-
-            this.publicKey = keyPair.getPublic();
-            this.privateKey = keyPair.getPrivate();
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-        }
+@RequestMapping("/api/files")
+public class FilesController extends BaseController {
+    private final FilesService filesService;
+    protected FilesController(JwtUtilService jwtUtilService, FilesService filesService) {
+        super(LoggerFactory.getLogger(FilesController.class), jwtUtilService);
+        this.filesService = filesService;
     }
 
-    @PostMapping("/encrypt")
+    @PostMapping
+    public ResponseEntity<?> uploadFile(@RequestParam("file") MultipartFile file, @RequestHeader("Authorization") String accessToken)
+            throws IOException, DecoderException, EncryptionException, InvalidKeySpecException {
+        accessToken = validateAndFetchToken(accessToken);
+        String username = jwtService.getUsernameFromToken(accessToken);
+        filesService.upload(file, accessToken);
+        return ResponseEntity.ok().body("Uploaded");
+    }
+    @GetMapping("/{id}")
+    public HttpEntity<byte[]> downloadFile(@PathVariable long id, @RequestHeader("Authorization") String accessToken)
+            throws IOException, IllegalAccessException, EncryptionException, InvalidKeySpecException {
+        accessToken = validateAndFetchToken(accessToken);
+        String username = jwtService.getUsernameFromToken(accessToken);
+        File file = filesService.download(id, username);
+        HttpHeaders header = new HttpHeaders();
+        header.setContentType(MediaType.APPLICATION_PDF);
+        header.set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + file.getName()
+                .substring(0, file.getName().lastIndexOf(".pdf")).replace(" ", "_"));
+        header.setContentLength(file.getContent().length);
+        return new HttpEntity<>(file.getContent(), header);
+    }
+
+
+    /*@PostMapping
     public byte[] encrypt(@RequestParam("file") MultipartFile file) {
         try {
             // Generate a symmetric key
@@ -91,5 +111,5 @@ public class TextEncrypt {
             e.printStackTrace();
         }
         return null;
-    }
+    }*/
 }

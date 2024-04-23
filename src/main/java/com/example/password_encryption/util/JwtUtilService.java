@@ -30,7 +30,7 @@ public class JwtUtilService implements Serializable {
         this.repository = Objects.requireNonNull(repository);
     }
     //for retrieving any information from token we will need the secret key
-    private Claims getAllClaimsFromToken(String token) {
+    public Claims getAllClaimsFromToken(String token) {
         SecretKey secret = Keys.hmacShaKeyFor(secretKeyString.getBytes());
         return Jwts.parserBuilder().setSigningKey(secret).build().parseClaimsJws(token).getBody();
     }
@@ -52,8 +52,7 @@ public class JwtUtilService implements Serializable {
         return expiration.before(new Date());
     }
     //generate token for user
-    public String generateAccessToken(User userDetails) {
-        Map<String, Object> claims = new HashMap<>();
+    public String generateAccessToken(User userDetails, Map<String, Object> claims) {
         claims.put("username", userDetails.getUsername());
         return generateAccessToken(claims, userDetails.getUsername());
     }
