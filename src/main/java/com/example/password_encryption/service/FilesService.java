@@ -67,6 +67,7 @@ public class FilesService {
         RsaKeyGen rsaKeyGen = new RsaKeyGen();
         PrivateKey privateKey = rsaKeyGen.getPrivateKey(user.getId());
         byte[] data = RsaUtils.decrypt(file.getContent(), privateKey);
+        file.setContent(data);
         return file;
     }
 }
