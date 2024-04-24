@@ -35,8 +35,9 @@ public class JwtUtilService implements Serializable {
         return Jwts.parserBuilder().setSigningKey(secret).build().parseClaimsJws(token).getBody();
     }
     //retrieve username from jwt token
-    public String getUsernameFromToken(String token) {
-        return getClaimFromToken(token, Claims::getSubject);
+    public long getUserIdFromToken(String token) {
+        var claims = getAllClaimsFromToken(token);
+        return claims.get("id", Long.class);
     }
     //retrieve expiration date from jwt token
     public Date getExpirationDateFromToken(String token) {
@@ -53,7 +54,7 @@ public class JwtUtilService implements Serializable {
     }
     //generate token for user
     public String generateAccessToken(User userDetails, Map<String, Object> claims) {
-        claims.put("username", userDetails.getUsername());
+        claims.put("id", userDetails.getId());
         return generateAccessToken(claims, userDetails.getUsername());
     }
     public String generateRefreshToken(){
@@ -75,7 +76,7 @@ public class JwtUtilService implements Serializable {
     //validate token
     public boolean isValid(String token) {
         if(isExpired(token)) throw new JwtException("Given token is expired");
-        String username = getUsernameFromToken(token);
-        return username != null && !username.isEmpty();
+        long userId = getUserIdFromToken(token);
+        return userId > 0;
     }
 }
