@@ -35,7 +35,7 @@ public class FilesService {
         this.usersRepository = usersRepository;
         this.jwtUtilService = jwtUtilService;
     }
-    public void upload(MultipartFile file, String token) throws IOException, DecoderException, InvalidKeySpecException, EncryptionException {
+    public void upload(MultipartFile file, String token, long id) throws IOException, DecoderException, InvalidKeySpecException, EncryptionException {
         if(!file.getContentType().endsWith("pdf")) throw new IllegalArgumentException("File format is invalid. Only pdf is accepted");
         long userId = jwtUtilService.getUserIdFromToken(token);
         var userOpt = usersRepository.findById(userId);
@@ -44,8 +44,10 @@ public class FilesService {
         var fileBytes = file.getBytes();
         var fileName = file.getOriginalFilename();
 
-        RsaKeyGen rsaKeyGen = new RsaKeyGen();
-        PublicKey publicKey = rsaKeyGen.getPublicKey(jwtUtilService, token);
+        RsaKeyGen keyGenerator = new RsaKeyGen();
+        PublicKey publicKey = keyGenerator.getPublicKey();
+        keyGenerator.saveOrRewritePrivateKeyFile(id);
+
         fileBytes = RsaUtils.encrypt(fileBytes, publicKey);
 
         File newFile = new File(fileName, userOpt.get().getId(), fileBytes);
@@ -61,7 +63,7 @@ public class FilesService {
         User user = userOpt.get();
         if(file.getUserId() != user.getId()) throw new IllegalAccessException("Unauthorized file download attempt");
         RsaKeyGen rsaKeyGen = new RsaKeyGen();
-        PrivateKey privateKey = rsaKeyGen.getPrivateKey(user.getId());
+        PrivateKey privateKey = rsaKeyGen.getFilePrivateKey(user.getId());
         byte[] data = RsaUtils.decrypt(file.getContent(), privateKey);
         file.setContent(data);
         return file;

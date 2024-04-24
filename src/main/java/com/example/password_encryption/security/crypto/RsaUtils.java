@@ -47,6 +47,7 @@ public class RsaUtils {
             System.arraycopy(encryptedData, encryptedKey.length, encryptedFileBytes, 0, encryptedFileBytes.length);
 
             // Decrypt the symmetric key with RSA private key
+            RsaKeyGen rsaKeyGen = new RsaKeyGen();
             Cipher cipher = Cipher.getInstance("RSA");
             cipher.init(Cipher.DECRYPT_MODE, privateKey);
             byte[] decryptedKeyBytes = cipher.doFinal(encryptedKey);
