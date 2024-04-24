@@ -32,22 +32,11 @@ public class RsaKeyGen {
             e.printStackTrace();
         }
     }
-    public PublicKey getPublicKey(JwtUtilService jwtUtilService, String token) throws InvalidKeySpecException, DecoderException {
-        String publicKeyStr = jwtUtilService.getAllClaimsFromToken(token).get("public_key").toString();
-        try {
-            byte[] publicKeyBytes = Hex.decodeHex(publicKeyStr.toCharArray());
-            EncodedKeySpec publicKeySpec = new X509EncodedKeySpec(publicKeyBytes);
-            return keyFactory.generatePublic(publicKeySpec);
-        } catch (InvalidKeySpecException | DecoderException e) {
-            logger.error("Failed to retrieve public key, {}", e.getMessage());
-            throw e;
-        }
-    }
     public PublicKey getPublicKey() {
         return keyPair.getPublic();
     }
-    public PrivateKey getPrivateKey(long userId) throws IOException, InvalidKeySpecException {
-        File privateKeyFile = new File(String.format("%s\\keys\\%d_rsa_private.key", keyStoragePath, userId));
+    public PrivateKey getPrivateKey(long userId, long fileId) throws IOException, InvalidKeySpecException {
+        File privateKeyFile = new File(String.format("%s\\keys\\%d_%d_rsa_private.key", keyStoragePath, userId, fileId));
         try {
             byte[] privateKeyBytes = Files.readAllBytes(privateKeyFile.toPath());
             EncodedKeySpec privateKeySpec = new PKCS8EncodedKeySpec(privateKeyBytes);
@@ -57,41 +46,9 @@ public class RsaKeyGen {
             throw e;
         }
     }
-
-    public PublicKey getFilePublicKey(JwtUtilService jwtUtilService, String token) throws InvalidKeySpecException, DecoderException {
-        String publicKeyStr = jwtUtilService.getAllClaimsFromToken(token).get("public_key").toString();
-        try {
-            byte[] publicKeyBytes = Hex.decodeHex(publicKeyStr.toCharArray());
-            EncodedKeySpec publicKeySpec = new X509EncodedKeySpec(publicKeyBytes);
-            return keyFactory.generatePublic(publicKeySpec);
-        } catch (InvalidKeySpecException | DecoderException e) {
-            logger.error("Failed to retrieve public key, {}", e.getMessage());
-            throw e;
-        }
-    }
-    public PrivateKey getFilePrivateKey(long userId) throws IOException, InvalidKeySpecException {
-        File privateKeyFile = new File(String.format("%s\\keys\\pdffiles\\%d_rsa_private.key", keyStoragePath, userId));
-        try {
-            byte[] privateKeyBytes = Files.readAllBytes(privateKeyFile.toPath());
-            EncodedKeySpec privateKeySpec = new PKCS8EncodedKeySpec(privateKeyBytes);
-            return keyFactory.generatePrivate(privateKeySpec);
-        } catch (IOException | InvalidKeySpecException e) {
-            logger.error("Failed to retrieve private key, {}", e.getMessage());
-            throw e;
-        }
-    }
-    public void saveOrRewritePrivateKey(long userId) throws IOException {
+    public void savePrivateKey(long userId, long fileId) throws IOException {
         var privateKey = keyPair.getPrivate();
-        try (OutputStream fos = new FileOutputStream(String.format("%s\\keys\\%d_rsa_private.key", keyStoragePath, userId))) {
-            fos.write(privateKey.getEncoded());
-        } catch (IOException e) {
-            logger.error("Failed to store private key, {}", e.getMessage());
-            throw e;
-        }
-    }
-    public void saveOrRewritePrivateKeyFile(long userId) throws IOException {
-        var privateKey = keyPair.getPrivate();
-        try (OutputStream fos = new FileOutputStream(String.format("%s\\keys\\pdffiles\\%d_rsa_private.key", keyStoragePath, userId))) {
+        try (OutputStream fos = new FileOutputStream(String.format("%s\\keys\\%d_%d_rsa_private.key", keyStoragePath, userId, fileId))) {
             fos.write(privateKey.getEncoded());
         } catch (IOException e) {
             logger.error("Failed to store private key, {}", e.getMessage());

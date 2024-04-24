@@ -1,24 +1,20 @@
 package com.example.password_encryption.service;
 
-import com.example.password_encryption.model.TokensBody;
-import com.example.password_encryption.security.crypto.RsaKeyGen;
-import com.example.password_encryption.security.hashing.PasswordHasher;
 import com.example.password_encryption.data.UsersRepository;
 import com.example.password_encryption.dto.UserDto;
+import com.example.password_encryption.model.TokensBody;
 import com.example.password_encryption.model.User;
+import com.example.password_encryption.security.hashing.PasswordHasher;
 import com.example.password_encryption.util.InvalidCredentialsException;
 import com.example.password_encryption.util.JwtUtilService;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.codec.binary.Hex;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
-import java.security.PublicKey;
 import java.security.spec.InvalidKeySpecException;
 import java.time.LocalDate;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 
@@ -54,12 +50,7 @@ public class UserService {
         user = repository.save(user);
         log.info("Added user with id {} to database;", user.getId());
 
-        RsaKeyGen keyGenerator = new RsaKeyGen();
-        PublicKey publicKey = keyGenerator.getPublicKey();
-        keyGenerator.saveOrRewritePrivateKey(user.getId());
-        var claims = new HashMap<String, Object>();
-        claims.put("public_key", Hex.encodeHexString(publicKey.getEncoded()));
-        final String accessToken = jwtService.generateAccessToken(user, claims);
+        final String accessToken = jwtService.generateAccessToken(user);
 
         return new TokensBody(accessToken, refreshToken);
     }
@@ -76,14 +67,7 @@ public class UserService {
         user.setRefreshTokenExpiryDate(LocalDate.now().plusDays(expirationForRefresh));
         repository.save(user);
 
-        RsaKeyGen keyGenerator = new RsaKeyGen();
-        PublicKey publicKey = keyGenerator.getPublicKey();
-        keyGenerator.saveOrRewritePrivateKey(user.getId());
-
-        var claims = new HashMap<String, Object>();
-        claims.put("public_key", Hex.encodeHexString(publicKey.getEncoded()));
-
-        final String newAccessToken = jwtService.generateAccessToken(user, claims);
+        final String newAccessToken = jwtService.generateAccessToken(user);
         return new TokensBody(newAccessToken, newRefreshToken);
     }
     public List<User> getAllUsers(){

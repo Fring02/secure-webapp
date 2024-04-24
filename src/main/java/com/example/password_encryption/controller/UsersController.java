@@ -5,9 +5,6 @@ import com.example.password_encryption.model.TokensBody;
 import com.example.password_encryption.service.UserService;
 import com.example.password_encryption.util.InvalidCredentialsException;
 import com.example.password_encryption.util.JwtUtilService;
-import io.jsonwebtoken.JwtException;
-import io.micrometer.common.util.StringUtils;
-import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -23,10 +20,6 @@ public class UsersController extends BaseController {
     public UsersController(UserService service, JwtUtilService jwtService) {
         super(LoggerFactory.getLogger(UsersController.class), jwtService);
         this.service = service;
-    }
-    @GetMapping("/hello")
-    public String getHello(){
-        return "hello";
     }
     @PostMapping("/register")
     public ResponseEntity<TokensBody> registerUser(@RequestBody UserDto dto) throws InvalidCredentialsException, NoSuchAlgorithmException, InvalidKeySpecException, IOException {

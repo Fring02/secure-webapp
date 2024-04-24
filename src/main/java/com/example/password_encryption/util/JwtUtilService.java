@@ -53,7 +53,8 @@ public class JwtUtilService implements Serializable {
         return expiration.before(new Date());
     }
     //generate token for user
-    public String generateAccessToken(User userDetails, Map<String, Object> claims) {
+    public String generateAccessToken(User userDetails) {
+        Map<String, Object> claims = new HashMap<>();
         claims.put("id", userDetails.getId());
         return generateAccessToken(claims, userDetails.getUsername());
     }

@@ -28,15 +28,16 @@ public class FilesController extends BaseController {
         this.filesService = filesService;
     }
 
-    @PostMapping("/{id}")
-    public ResponseEntity<?> uploadFile(@PathVariable long id, @RequestParam("file") MultipartFile file, @RequestHeader("Authorization") String accessToken)
+    @PostMapping
+    public ResponseEntity<?> uploadFile(@RequestParam("file") MultipartFile file, @RequestHeader("Authorization") String accessToken)
             throws IOException, DecoderException, EncryptionException, InvalidKeySpecException {
         accessToken = validateAndFetchToken(accessToken);
+        var id = jwtService.getUserIdFromToken(accessToken);
         filesService.upload(file, accessToken, id);
         return ResponseEntity.ok().body("Uploaded");
     }
-    @GetMapping("/{id}")
-    public HttpEntity<byte[]> downloadFile(@PathVariable long id, @RequestHeader("Authorization") String accessToken)
+    @GetMapping("/{file_id}")
+    public HttpEntity<byte[]> downloadFile(@PathVariable("file_id") long id, @RequestHeader("Authorization") String accessToken)
             throws IOException, IllegalAccessException, EncryptionException, InvalidKeySpecException {
         accessToken = validateAndFetchToken(accessToken);
         long userId = jwtService.getUserIdFromToken(accessToken);
