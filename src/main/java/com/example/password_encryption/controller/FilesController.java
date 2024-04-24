@@ -28,11 +28,11 @@ public class FilesController extends BaseController {
         this.filesService = filesService;
     }
 
-    @PostMapping
-    public ResponseEntity<?> uploadFile(@RequestParam("file") MultipartFile file, @RequestHeader("Authorization") String accessToken)
+    @PostMapping("/{id}")
+    public ResponseEntity<?> uploadFile(@PathVariable long id, @RequestParam("file") MultipartFile file, @RequestHeader("Authorization") String accessToken)
             throws IOException, DecoderException, EncryptionException, InvalidKeySpecException {
         accessToken = validateAndFetchToken(accessToken);
-        filesService.upload(file, accessToken);
+        filesService.upload(file, accessToken, id);
         return ResponseEntity.ok().body("Uploaded");
     }
     @GetMapping("/{id}")
