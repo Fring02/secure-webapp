@@ -11,7 +11,6 @@ import com.example.password_encryption.util.EncryptionException;
 import com.example.password_encryption.util.JwtUtilService;
 import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityNotFoundException;
-import org.apache.commons.codec.DecoderException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -35,7 +34,7 @@ public class FilesService {
         this.usersRepository = usersRepository;
         this.jwtUtilService = jwtUtilService;
     }
-    public void upload(MultipartFile file, String token, long id) throws IOException, DecoderException, InvalidKeySpecException, EncryptionException {
+    public void upload(MultipartFile file, String token, long id) throws IOException, EncryptionException {
         if(!file.getContentType().endsWith("pdf")) throw new IllegalArgumentException("File format is invalid. Only pdf is accepted");
         long userId = jwtUtilService.getUserIdFromToken(token);
         var userOpt = usersRepository.findById(userId);
@@ -44,14 +43,17 @@ public class FilesService {
         var fileBytes = file.getBytes();
         var fileName = file.getOriginalFilename();
 
+        File newFile = new File(fileName, userOpt.get().getId(), fileBytes);
+        newFile = repository.save(newFile);
+        var fileId = newFile.getId();
+
         RsaKeyGen keyGenerator = new RsaKeyGen();
         PublicKey publicKey = keyGenerator.getPublicKey();
-        keyGenerator.saveOrRewritePrivateKeyFile(id);
-
+        keyGenerator.savePrivateKey(id, fileId);
         fileBytes = RsaUtils.encrypt(fileBytes, publicKey);
+        newFile.setContent(fileBytes);
+        newFile = repository.save(newFile);
 
-        File newFile = new File(fileName, userOpt.get().getId(), fileBytes);
-        repository.save(newFile);
         logger.info("Saved file " + fileName + " for user " + userOpt.get().getId());
     }
     public File download(long fileId, long userId) throws IllegalAccessException, IOException, InvalidKeySpecException, EncryptionException {
@@ -63,7 +65,7 @@ public class FilesService {
         User user = userOpt.get();
         if(file.getUserId() != user.getId()) throw new IllegalAccessException("Unauthorized file download attempt");
         RsaKeyGen rsaKeyGen = new RsaKeyGen();
-        PrivateKey privateKey = rsaKeyGen.getFilePrivateKey(user.getId());
+        PrivateKey privateKey = rsaKeyGen.getPrivateKey(user.getId(), file.getId());
         byte[] data = RsaUtils.decrypt(file.getContent(), privateKey);
         file.setContent(data);
         return file;
