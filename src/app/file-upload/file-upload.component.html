@@ -1,0 +1,8 @@
+<div class="upload-container">
+    <div class="form-container">
+      <h2>File Upload</h2>
+      <input type="file" (change)="onFileSelected($event)" multiple>
+      <button (click)="onUpload()" [disabled]="!filesToUpload.length">Upload Files</button>
+    </div>
+</div>
+  

@@ -1,0 +1,22 @@
+<div class="file-list-container">
+    <h2>Uploaded Files</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>File Name</th>
+          <th>Size</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let file of files">
+          <td>{{ file.name }}</td>
+          <td>{{ file.size | number }} bytes</td>
+          <td>
+            <button (click)="downloadFile(file)">Download</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  
