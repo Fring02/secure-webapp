@@ -41,7 +41,7 @@ public class RsaUtils {
     public static byte[] decrypt(byte[] encryptedData, PrivateKey privateKey) throws EncryptionException {
         try {
             int keySize = 256; // assuming 2048-bit RSA key size
-            byte[] encryptedKey = new byte[keySize / 8];
+            byte[] encryptedKey = new byte[keySize];
             byte[] encryptedFileBytes = new byte[encryptedData.length - encryptedKey.length];
             System.arraycopy(encryptedData, 0, encryptedKey, 0, encryptedKey.length);
             System.arraycopy(encryptedData, encryptedKey.length, encryptedFileBytes, 0, encryptedFileBytes.length);

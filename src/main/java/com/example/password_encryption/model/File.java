@@ -5,6 +5,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+
 @Entity
 @Table(name = "files")
 @Getter
@@ -21,6 +24,8 @@ public class File {
     private long userId;
     @Column(name = "content", nullable = false)
     private byte[] content;
+    @Column(name = "uploadDate", nullable = false)
+    private LocalDateTime uploadDate = LocalDateTime.now();
     public File(String name, long userId, byte[] content) {
         this.name = name;
         this.userId = userId;
