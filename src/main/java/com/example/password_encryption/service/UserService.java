@@ -1,6 +1,7 @@
 package com.example.password_encryption.service;
 
 import com.example.password_encryption.data.UsersRepository;
+import com.example.password_encryption.dto.LoginDto;
 import com.example.password_encryption.dto.UserDto;
 import com.example.password_encryption.model.TokensBody;
 import com.example.password_encryption.model.User;
@@ -54,7 +55,7 @@ public class UserService {
 
         return new TokensBody(accessToken, refreshToken);
     }
-    public TokensBody login(UserDto userDto) throws NoSuchAlgorithmException, InvalidKeySpecException, InvalidCredentialsException, IOException {
+    public TokensBody login(LoginDto userDto) throws NoSuchAlgorithmException, InvalidKeySpecException, InvalidCredentialsException, IOException {
         Optional<User> userOpt = repository.findByUsername(userDto.getUsername());
         if(userOpt.isEmpty()) throw new InvalidCredentialsException("Username not found");
         User user = userOpt.get();

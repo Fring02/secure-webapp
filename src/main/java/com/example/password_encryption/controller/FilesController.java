@@ -30,7 +30,7 @@ public class FilesController extends BaseController {
 
     @PostMapping
     public ResponseEntity<?> uploadFile(@RequestParam("file") MultipartFile file, @RequestHeader("Authorization") String accessToken)
-            throws IOException, DecoderException, EncryptionException, InvalidKeySpecException {
+            throws IOException, EncryptionException {
         accessToken = validateAndFetchToken(accessToken);
         var id = jwtService.getUserIdFromToken(accessToken);
         filesService.upload(file, accessToken, id);
