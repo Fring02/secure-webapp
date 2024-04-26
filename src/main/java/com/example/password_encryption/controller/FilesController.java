@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.security.spec.InvalidKeySpecException;
 
 @RestController
+@CrossOrigin(origins = "http://localhost:4200")
 @RequestMapping("/api/files")
 public class FilesController extends BaseController {
     private final FilesService filesService;

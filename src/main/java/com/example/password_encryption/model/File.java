@@ -31,4 +31,8 @@ public class File {
         this.userId = userId;
         this.content = content;
     }
+    @Transient
+    public double getSize(){
+        return (double) content.length / 1024;
+    }
 }
