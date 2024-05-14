@@ -1,10 +1,12 @@
 package com.example.password_encryption.controller;
 
+import com.example.password_encryption.dto.LoginDto;
 import com.example.password_encryption.dto.UserDto;
 import com.example.password_encryption.model.TokensBody;
 import com.example.password_encryption.service.UserService;
 import com.example.password_encryption.util.InvalidCredentialsException;
 import com.example.password_encryption.util.JwtUtilService;
+import jakarta.validation.Valid;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -14,6 +16,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 
 @RestController
+@CrossOrigin(origins = "http://localhost:4200")
 @RequestMapping("/api/users")
 public class UsersController extends BaseController {
     private final UserService service;
@@ -22,12 +25,12 @@ public class UsersController extends BaseController {
         this.service = service;
     }
     @PostMapping("/register")
-    public ResponseEntity<TokensBody> registerUser(@RequestBody UserDto dto) throws InvalidCredentialsException, NoSuchAlgorithmException, InvalidKeySpecException, IOException {
+    public ResponseEntity<TokensBody> registerUser(@RequestBody @Valid UserDto dto) throws InvalidCredentialsException, NoSuchAlgorithmException, InvalidKeySpecException, IOException {
         var tokens = service.register(dto);
         return ResponseEntity.ok(tokens);
     }
     @PostMapping("/login")
-    public ResponseEntity<TokensBody> loginUser(@RequestBody UserDto dto) throws InvalidCredentialsException, NoSuchAlgorithmException, InvalidKeySpecException, IOException {
+    public ResponseEntity<TokensBody> loginUser(@RequestBody @Valid LoginDto dto) throws InvalidCredentialsException, NoSuchAlgorithmException, InvalidKeySpecException, IOException {
         var tokens = service.login(dto);
         return ResponseEntity.ok(tokens);
     }
